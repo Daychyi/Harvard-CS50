@@ -9,7 +9,6 @@ X = "X"
 O = "O"
 EMPTY = None
 
-
 def initial_state():
     """
     Returns starting state of the board.
@@ -17,7 +16,6 @@ def initial_state():
     return [[EMPTY, EMPTY, EMPTY],
             [EMPTY, EMPTY, EMPTY],
             [EMPTY, EMPTY, EMPTY]]
-
 
 def player(board):
     """
@@ -35,7 +33,7 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    return {(i,j) for i in range(3) for j in range(3) if board[i][j] == EMPTY}
+    return sorted({(i,j) for i in range(3) for j in range(3) if board[i][j] == EMPTY})
     raise NotImplementedError
 
 
@@ -55,20 +53,21 @@ def winner(board):
     """
     Returns the winner of the game, if there is one.
     """
+    
      #winner by rows
     for row in board:
-        if row.count(row[0])==3:
+        if row.count(row[0])==3 and (row[0] is not EMPTY):
             return row[0] #winner
     
     #winner by columns
     for col in range(3):
-        if len(set(row[col] for row in board)) == 1:
+        if len(set(row[col] for row in board)) == 1 and (board[0][col] is not EMPTY):
             return board[0][col] #winner
         
     #winner by diagonal
-    if len(set(board[i][i] for i in range(3))) == 1:
+    if len(set(board[i][i] for i in range(3))) == 1 and (board[0][0] is not EMPTY):
         return board[0][0] #left to right diagonal
-    if len(set(board[-i-1][i] for i in range(3))) == 1:
+    if len(set(board[-i-1][i] for i in range(3))) == 1 and (board[-1][0] is not EMPTY):
         return board[-1][0] #right to left diagonal
     
     return None
@@ -98,7 +97,6 @@ def utility(board):
         case _:
             return 0
     raise NotImplementedError
-
 
 def minimax(board):
     """
