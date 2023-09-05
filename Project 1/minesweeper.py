@@ -178,6 +178,16 @@ class MinesweeperAI():
         # List of sentences about the game known to be true
         self.knowledge = []
 
+        # Set of all possible moves
+        self.all_moves = set()
+        self.get_all_moves()
+        
+
+    def get_all_moves(self):
+        for i in range(self.height):
+            for j in range(self.width):
+                self.all_moves.add((i,j))
+
     def mark_mine(self, cell):
         """
         Marks a cell as a mine, and updates all knowledge
@@ -254,11 +264,28 @@ class MinesweeperAI():
                 for c in mine_cells:
                     self.mark_mine(c)
         
+        self.update_knowledge()
         # print(f"moves_made: {self.moves_made}")
         # print(f"safe: {self.safes}")
         # print(f"mine: {self.mines}")
         # raise NotImplementedError
     
+    def update_knowledge(self):
+        """ Check and remove all safe and mine cells from knowledge """
+        new_knowledge = []
+        for sentence in self.knowledge:
+            new_sen = copy.deepcopy(sentence.cells)
+            new_count = sentence.count
+            for pos in sentence.cells:
+                if pos in self.safes:
+                    new_sen.remove(pos)
+                elif pos in self.mines:
+                    new_sen.remove(pos)
+                    new_count -= 1
+
+            new_knowledge.append(Sentence(new_sen,new_count))
+        self.knowledge = new_knowledge
+
     def make_safe_move(self):
         """
         Returns a safe cell to choose on the Minesweeper board.
@@ -270,6 +297,7 @@ class MinesweeperAI():
         """
         for move in self.safes:
             if move not in self.moves_made:
+                # print(f"AI safe move: {move}")
                 return move
         return None
         # raise NotImplementedError
@@ -281,13 +309,11 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        max_move = self.height*self.width - 8 #number of mines
-        while len(self.moves_made) < max_move: 
-            i = random.randrange(self.height)
-            j = random.randrange(self.width)
-            move = (i,j)
-            if move not in self.moves_made:
-                if move not in self.mines:
-                    # print(f"AI random move: {move}")
-                    return move
+        
+        if len(self.moves_made) < (self.height*self.width - 8): #number of mines
+            random_move = self.all_moves - self.moves_made - self.mines
+            move = random.sample(random_move, 1)
+            # print(f"AI random move: {move[0]}")
+            return move[0]
+        return None #No more move
         # raise NotImplementedError
